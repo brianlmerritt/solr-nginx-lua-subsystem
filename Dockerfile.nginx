@@ -1,0 +1,16 @@
+FROM openresty/openresty:1.21.4.1-alpine
+
+# Install curl for health checks
+RUN apk add --no-cache curl
+
+# Copy nginx configuration
+COPY nginx.conf /usr/local/openresty/nginx/conf/nginx.conf
+
+# Copy Lua scripts
+COPY lua/ /usr/local/openresty/nginx/lua/
+
+# Expose port 80 (internal to container)
+EXPOSE 80
+
+# Start nginx
+CMD ["/usr/local/openresty/bin/openresty", "-g", "daemon off;"]

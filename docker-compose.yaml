@@ -2,7 +2,7 @@ services:
   solr:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.solr
     container_name: solr_nginx_lua_proxy
     ports:
       - "8988:8983"
@@ -19,6 +19,26 @@ services:
     restart: always
     networks:
       - moodle_network
+  nginx-proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    container_name: nginx_lua_proxy
+    ports:
+      - "8983:80"  # Nginx proxy on the port clients expect
+    environment:
+      - SOLR_HOST=solr
+      - SOLR_PORT=8983
+    depends_on:
+      - solr
+    networks:
+      - moodle_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: always
 
 volumes:
   solr_proxy_data:
